@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block body %}
+    {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+    <form action="{{ url_for('index') }}" method="POST" enctype="multipart/form-data">
+        <dl>
+            <dt><label for="sender">Sender</label></dt>
+            <dd><input type="email" name="sender" id="sender"></dd>
+            <dt><label for="receiver">Receiver</label></dt>
+            <dd><input type="email" name="receiver" id="receiver"></dd>
+            <dt><label for="file">File</label></dt>
+            <dd><input type="file" name="file" id="file"></dd>
+            <input type="submit" value="Submit">
+        </dl>
+    </form>
+{% endblock %}

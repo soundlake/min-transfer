@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>{% block title %}Welcome to MinTrasnfer{% endblock %}</title>
+    <meta charset="utf-8">
+    {% assets "scss_all" %}
+        <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
+    {% endassets %}
+</head>
+
+<body>
+    <div id="container">
+        <div id="wrapper">
+            <h1>MinTransfer</h1>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class="flashes">
+                        {% for category, message in messages %}
+                            <div class="{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            {% block body %}{% endblock %}
+        </div><!--/#wrapper-->
+    </div><!--/#container-->
+</body>
+
+</html>
