@@ -4,11 +4,11 @@
     <form action="{{ url_for('index') }}" method="POST" enctype="multipart/form-data">
         <dl>
             <dt><label for="sender">Sender</label></dt>
-            <dd><input type="email" name="sender" id="sender"></dd>
+            <dd><input type="email" name="sender" id="sender" required></dd>
             <dt><label for="receiver">Receiver</label></dt>
-            <dd><input type="email" name="receiver" id="receiver"></dd>
+            <dd><input type="email" name="receiver" id="receiver" required></dd>
             <dt><label for="file">File</label></dt>
-            <dd><input type="file" name="file" id="file"></dd>
+            <dd><input type="file" name="file" id="file" required></dd>
             <input type="submit" value="Submit">
         </dl>
     </form>

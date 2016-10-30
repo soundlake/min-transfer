@@ -11,36 +11,44 @@
             padding: 50px;
 
             #wrapper {
-                width: 20em;
+                width: 22em;
 
                 h1 {
                     color: #990;
                     padding-bottom: 0.2em;
                 }
-                input {
+                a, input {
                     width: calc(100% - 4px);
+                    height: 1.6em;
                 }
                 input[type=submit] {
                     border: 0;
                     background-color: #990;
-                    height: 2em;
                     font-size: 1em;
                     cursor: pointer;
                 }
+                a {
+                    display: inline-block;
+                    background-color: #990;
+                    color: #000000;
+                    text-decoration: none;
+                    text-align: center;
+                }
 
+                dl {
+                    margin-top: 1em;
 
-                form {
-                    dl {
-                        margin-top: 0.5em;
-
-                        dt, dd {
-                            display: inline-block;
-                            float: left;
-                            margin-bottom: 0.5em;
-                        }
-                        dt { width: 6em; }
-                        dd { width: 14em; }
+                    dt, dd {
+                        display: inline-block;
+                        float: left;
+                        margin-bottom: 1em;
                     }
+                    dt {
+                        width: 8em;
+                        text-align: right;
+                        padding-right: 1em;
+                    }
+                    dd { width: 13em; }
                 }
 
                 .flashes {

@@ -2,8 +2,9 @@
 {% block body %}
     <dl>
         <dt>File Name</dt>
-        <dd>{{ the_file.name }}</dd>
+        <dd>{{ unquote(the_file.name) }}</dd>
         <dt>Uploaded Time</dt>
         <dd>{{ the_file.time }}</dd>
     </dl>
+    <a href="{{ url_for('download_file', file_id = the_file.id) }}">Download the File</a>
 {% endblock %}

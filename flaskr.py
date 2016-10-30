@@ -6,12 +6,14 @@ from flask import Flask, \
                   redirect, \
                   render_template, \
                   request, \
+                  send_from_directory, \
                   session, \
                   url_for
 from flask_assets import Environment, Bundle
 import os
 import sqlite3
 import uuid
+import urllib.parse
 
 
 
@@ -27,9 +29,19 @@ with app.open_resource('secret.key', mode='r') as secret:
         DATABASE            = os.path.join(app.root_path, 'var/flaskr.db'),
         SECRET_KEY          = secret.read().strip(),
         UPLOAD_FOLDER       = os.path.join(app.root_path, 'var', 'uploads'),
-        ALLOWED_EXTENSIONS  = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+        ALLOWED_EXTENSIONS  = set(['txt', 'doc', 'docx', 'hwp', \
+                                   'pdf', \
+                                   'png', 'jpg', 'jpeg', 'gif', \
+                                   'wav', 'wma', 'mp3', 'aiff', \
+                                   'mov', 'avi', 'wmv', 'mp4', \
+                                   'zip'])
     ))
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+
+
+
+# setup jinja2
+app.jinja_env.globals.update(unquote=urllib.parse.unquote)
 
 
 
@@ -83,7 +95,7 @@ def allowed_file(the_file):
        filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
 def save_file(the_file):
-    filename = the_file.filename
+    filename = urllib.parse.quote(the_file.filename)
     file_id = str(uuid.uuid4())
     db = get_db()
     db.execute('INSERT INTO upload (id, name) VALUES (?, ?)', (file_id, filename))
@@ -101,14 +113,12 @@ def index():
         if 'file' not in request.files:
             flash('No file part', 'error')
             return redirect(request.url)
-        '''
         if 'sender' not in request.form:
             flash('No sender', 'error')
             return redirect(request.url)
         if 'receiver' not in request.form:
             flash('No receiver', 'error')
             return redirect(request.url)
-        '''
         uploaded_file = request.files['file']
         if not uploaded_file.filename:
             flash('No file selected', 'error')
@@ -128,7 +138,7 @@ def index():
 @app.route('/<uuid:file_id>', methods=['GET'])
 def show_file(file_id):
     db = get_db()
-    cur = db.execute('SELECT name, time FROM upload WHERE id = ?', (str(file_id), ))
+    cur = db.execute('SELECT * FROM upload WHERE id = ?', (str(file_id), ))
     the_file = cur.fetchone()
     return render_template('show_file.html', the_file = the_file)
 
@@ -136,4 +146,10 @@ def show_file(file_id):
 
 @app.route('/<uuid:file_id>/download', methods=['GET'])
 def download_file(file_id):
-    pass
+    db = get_db()
+    cur = db.execute('SELECT name, time FROM upload WHERE id = ?', (str(file_id), ))
+    the_file = cur.fetchone()
+    return send_from_directory(app.config['UPLOAD_FOLDER'], \
+                               str(file_id), \
+                               as_attachment = True, \
+                               attachment_filename = the_file['name'])
