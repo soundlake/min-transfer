@@ -11,6 +11,7 @@ from flask import Flask, \
 from flask_assets import Environment, Bundle
 import os
 import sqlite3
+import uuid
 
 
 
@@ -26,6 +27,7 @@ with app.open_resource('secret.key', mode='r') as secret:
         DATABASE            = os.path.join(app.root_path, 'var/flaskr.db'),
         SECRET_KEY          = secret.read().strip(),
         UPLOAD_FOLDER       = os.path.join(app.root_path, 'var', 'uploads'),
+        ALLOWED_EXTENSIONS  = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
     ))
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
@@ -74,7 +76,64 @@ def close_db(error):
 
 
 
+# Utilities
+def allowed_file(the_file):
+    filename = the_file.filename
+    return '.' in filename and \
+       filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
+
+def save_file(the_file):
+    filename = the_file.filename
+    file_id = str(uuid.uuid4())
+    db = get_db()
+    db.execute('INSERT INTO upload (id, name) VALUES (?, ?)', (file_id, filename))
+    db.commit()
+    the_file.save(os.path.join(app.config['UPLOAD_FOLDER'], file_id))
+    return file_id
+
+
+
 # Routing
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    error = []
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part', 'error')
+            return redirect(request.url)
+        '''
+        if 'sender' not in request.form:
+            flash('No sender', 'error')
+            return redirect(request.url)
+        if 'receiver' not in request.form:
+            flash('No receiver', 'error')
+            return redirect(request.url)
+        '''
+        uploaded_file = request.files['file']
+        if not uploaded_file.filename:
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        if not error:
+            if not uploaded_file:
+                return redirect(url_for('show_file'))
+            if not allowed_file(uploaded_file):
+                return redirect(url_for('show_file'))
+            file_id = save_file(uploaded_file)
+            flash('File is uploaded.')
+            return redirect(url_for('show_file', file_id = file_id))
+    return render_template('index.html', error = error)
+
+
+
+@app.route('/<uuid:file_id>', methods=['GET'])
+def show_file(file_id):
+    db = get_db()
+    cur = db.execute('SELECT name, time FROM upload WHERE id = ?', (str(file_id), ))
+    the_file = cur.fetchone()
+    return render_template('show_file.html', the_file = the_file)
+
+
+
+@app.route('/<uuid:file_id>/download', methods=['GET'])
+def download_file(file_id):
+    pass
